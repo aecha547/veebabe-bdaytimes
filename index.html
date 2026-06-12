@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -15,6 +17,7 @@
             --paper-darker: #eadecc;
             --ink-color: #1a1a1a;
             --desk-bg: #0d0d0d;
+            --glow-color: #ff3c00;
         }
 
         * {
@@ -35,7 +38,116 @@
             font-family: 'Playfair Display', serif;
         }
 
-        /* Ombre et texture de fond du bureau */
+        /* --- ÉCRAN DE DÉMARRAGE CRT & STATIQUE --- */
+        #intro-terminal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #050505;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.8s ease, visibility 0.8s;
+        }
+
+        #static-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .crt-scanlines {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .breaking-box {
+            position: relative;
+            z-index: 3;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .breaking-tag {
+            font-family: 'Special Elite', monospace;
+            background-color: var(--glow-color);
+            color: #000;
+            padding: 6px 16px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            box-shadow: 0 0 15px var(--glow-color);
+            animation: pulseGlow 1.5s infinite alternate;
+        }
+
+        .terminal-headline {
+            font-family: 'Special Elite', monospace;
+            color: #fff;
+            font-size: 1.4rem;
+            letter-spacing: 2px;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+            margin-bottom: 20px;
+        }
+
+        .tune-in-btn {
+            background: transparent;
+            border: 2px solid #fff;
+            color: #fff;
+            padding: 12px 28px;
+            font-family: 'Special Elite', monospace;
+            font-size: 1rem;
+            cursor: pointer;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(255,255,255,0.1);
+        }
+
+        .tune-in-btn:hover {
+            background-color: #fff;
+            color: #000;
+            box-shadow: 0 0 20px rgba(255,255,255,0.5);
+        }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.05); opacity: 1; }
+        }
+
+        /* --- EFFET DE SECOUSSE DE L'ÉCRAN --- */
+        .screen-shake {
+            animation: screenImpact 0.4s ease-out forwards;
+        }
+
+        @keyframes screenImpact {
+            0% { transform: translate(0, 0); }
+            15% { transform: translate(-15px, 12px) rotate(-1deg); }
+            30% { transform: translate(12px, -10px) rotate(1deg); }
+            45% { transform: translate(-8px, 6px); }
+            60% { transform: translate(5px, -4px); }
+            75% { transform: translate(-2px, 2px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        /* --- BUREAU DE TRAVAIL & AMBIANCE --- */
         .desk-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -44,18 +156,54 @@
             z-index: 10;
         }
 
-        /* Conteneur 3D de la carte */
+        .blinds-shadow {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(
+                to bottom,
+                rgba(0,0,0,0) 0%,
+                rgba(0,0,0,0) 40px,
+                rgba(0,0,0,0.65) 44px,
+                rgba(0,0,0,0.65) 80px
+            );
+            pointer-events: none;
+            opacity: 0.45;
+            z-index: 9;
+        }
+
+        /* --- CONTENEUR DE LA CARTE --- */
+        .card-viewport {
+            display: none; /* Rendu visible après l'intro */
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            justify-content: center;
+            align-items: center;
+            z-index: 5;
+        }
+
         .card-container {
             width: 480px;
             height: 650px;
-            position: relative;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0) rotate(-720deg);
             transform-style: preserve-3d;
             transition: transform 1.6s cubic-bezier(0.15, 0.85, 0.31, 1);
             cursor: pointer;
+            opacity: 0;
         }
 
-        .card-container.open {
-            transform: rotateY(0deg) translateX(120px);
+        /* Classe déclenchée par l'impact du lancer */
+        .card-container.slammed {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1) rotate(0deg);
+        }
+
+        /* Ajustement de la translation pour maintenir le centrage visuel du dossier ouvert */
+        .card-container.slammed.open {
+            transform: translate(-25%, -50%) scale(1) rotateY(0deg);
         }
 
         /* Pages de la carte */
@@ -71,7 +219,7 @@
             border-radius: 2px;
         }
 
-        /* Couverture pliante (Front & Inside Left) */
+        /* Couverture pliante */
         .cover {
             transform-origin: left center;
             transform-style: preserve-3d;
@@ -110,7 +258,7 @@
             align-items: center;
         }
 
-        /* --- Éléments Esthétiques Journal --- */
+        /* --- ÉLÉMENTS NEWSPAPER --- */
         .newspaper-header {
             text-align: center;
             border-bottom: 3px double var(--ink-color);
@@ -161,11 +309,10 @@
             letter-spacing: 12px;
             text-transform: uppercase;
             color: var(--ink-color);
-            margin-right: -12px; /* Compenser l'espacement de la dernière lettre */
+            margin-right: -12px;
             line-height: 1.1;
         }
 
-        /* Conteneur de l'image de presse */
         .photo-frame {
             position: relative;
             width: 100%;
@@ -176,7 +323,6 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
 
-        /* Coins de fixation photo traditionnels */
         .photo-frame::before, .photo-frame::after,
         .photo-corner-bl, .photo-corner-br {
             content: '';
@@ -201,7 +347,7 @@
             border: 1px solid #dcd7ca;
         }
 
-        /* --- Page Intérieure (Le Message Secret) --- */
+        /* --- PAGE INTÉRIEURE (MESSAGE) --- */
         .inner-message {
             font-family: 'La Belle Aurore', cursive;
             font-size: 1.95rem;
@@ -211,27 +357,38 @@
             max-width: 320px;
         }
 
-        /* Indication interactive discrète */
-        .interaction-hint {
+        /* --- INVITATION À L'INTERACTION (LANGUETTE DOSSIER) --- */
+        .file-tab-prompt {
             position: absolute;
-            bottom: -50px;
-            left: 50%;
-            transform: translateX(-50%);
+            top: 240px;
+            right: -32px;
+            background-color: #c4331a;
+            color: #fff;
             font-family: 'Special Elite', monospace;
-            font-size: 0.8rem;
-            color: rgba(255,255,255,0.4);
-            letter-spacing: 2px;
+            font-size: 0.72rem;
+            padding: 12px 6px;
             text-transform: uppercase;
-            pointer-events: none;
-            transition: opacity 0.5s;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            letter-spacing: 2px;
+            border-radius: 0 4px 4px 0;
+            box-shadow: 3px 2px 8px rgba(0,0,0,0.4);
+            transition: opacity 0.5s, transform 0.5s;
+            z-index: 10;
+            animation: subtleSlide 1.5s infinite alternate;
         }
 
-        .card-container.open + .interaction-hint {
+        .card-container.open .file-tab-prompt {
             opacity: 0;
+            transform: translateX(-10px);
+            pointer-events: none;
         }
 
-        /* Plis et ombres de papier vieilli réalistes */
+        @keyframes subtleSlide {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(4px); }
+        }
+
         .paper-crease {
             position: absolute;
             top: 0;
@@ -245,71 +402,144 @@
 </head>
 <body>
 
+    <!-- Système de rendu de friture d'antenne analogique -->
+    <div id="intro-terminal">
+        <canvas id="static-canvas"></canvas>
+        <div class="crt-scanlines"></div>
+        <div class="breaking-box">
+            <div class="breaking-tag">Breaking News</div>
+            <div class="terminal-headline">Dr. Mind INVESTIGATIONS </div>
+            <button class="tune-in-btn" onclick="initiateSlam()">Intercepter le Signal</button>
+        </div>
+    </div>
+
+    <div class="blinds-shadow"></div>
     <div class="desk-overlay"></div>
 
-    <!-- Conteneur Principal de la Carte -->
-    <div class="card-container" id="birthdayCard" onclick="toggleCard()">
-        
-        <!-- Page de Couverture Active -->
-        <div class="page cover">
-            <!-- Recto (Front du Journal) -->
-            <div class="page cover-front">
-                <div class="newspaper-header">
-                    <h1 class="newspaper-title">The birthday times</h1>
-                    <div class="metadata-bar">
-                        <span>BORN 12.06</span>
-                        <span>NUMBER:35</span>
+    <!-- Conteneur global de rendu après lancement -->
+    <div class="card-viewport" id="viewport">
+        <div class="card-container" id="birthdayCard" onclick="toggleCard()">
+            
+            <!-- Ruban dossier invitant à ouvrir -->
+            <div class="file-tab-prompt">Ouvrir le dossier</div>
+
+            <!-- Page de Couverture Active -->
+            <div class="page cover">
+                <!-- Recto -->
+                <div class="page cover-front">
+                    <div class="newspaper-header">
+                        <h1 class="newspaper-title">The birthday times</h1>
+                        <div class="metadata-bar">
+                            <span>BORN 12.06</span>
+                            <span>NUMBER:35</span>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="headline-section">
-                    <h2 class="happy-birthday-sub">Happy Birthday</h2>
-                    <h1 class="main-name">V e e B a b e</h1>
+                    
+                    <div class="headline-section">
+                        <h2 class="happy-birthday-sub">Happy Birthday</h2>
+                        <h1 class="main-name">V e e B a b e</h1>
+                    </div>
+
+                    <div class="photo-frame">
+                        <img src="BPaper.png" alt="VeeBabe Portrait">
+                        <div class="photo-corner-bl"></div>
+                        <div class="photo-corner-br"></div>
+                    </div>
+                    <div class="paper-crease"></div>
                 </div>
 
-                <div class="photo-frame">
-                    <img src="BPaper.png" alt="VeeBabe Portrait">
-                    <div class="photo-corner-bl"></div>
-                    <div class="photo-corner-br"></div>
+                <!-- Verso -->
+                <div class="page cover-back">
+                    <div class="paper-crease" style="transform: scaleX(-1);"></div>
+                </div>
+            </div>
+
+            <!-- Page de Fond (Intérieur) -->
+            <div class="page base-page">
+                <div class="inner-message">
+                    Breaking News.<br>
+                    A beautiful French girl on the loose.<br>
+                    If anyone finds her<br>
+                    contact @Aecha ;)<br>
+                    I love you.
                 </div>
                 <div class="paper-crease"></div>
             </div>
 
-            <!-- Verso (Page Intérieure Gauche - Vierge) -->
-            <div class="page cover-back">
-                <div class="paper-crease" style="transform: scaleX(-1);"></div>
-            </div>
         </div>
-
-        <!-- Page Intérieure Droite (Message Fixe) -->
-        <div class="page base-page">
-            <div class="inner-message">
-                Breaking News.<br>
-                A beautiful French girl on the loose.<br>
-                If anyone finds her<br>
-                contact @Aecha ;)<br>
-                I love you.
-            </div>
-            <div class="paper-crease"></div>
-        </div>
-
     </div>
 
-    <!-- Guidage Interactif -->
-    <div class="interaction-hint" id="hintText">Cliquer pour ouvrir</div>
+    <!-- Lecteur Audio d'ambiance -->
+    <audio id="noir-theme" src="KIRBY - Saving Grace (Official Music Video) from Spider-Noir (The Prime Original Series).mp3" loop></audio>
 
     <script>
+        // Rendu dynamique du grain statique CRT
+        const canvas = document.getElementById('static-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function generateNoise() {
+            const idata = ctx.createImageData(canvas.width, canvas.height);
+            const buffer = new Uint32Array(idata.data.buffer);
+            const len = buffer.length;
+            
+            for (let i = 0; i < len; i++) {
+                if (Math.random() < 0.5) {
+                    buffer[i] = 0xff101010; // Pixel sombre
+                } else {
+                    buffer[i] = 0xff505050; // Pixel gris
+                }
+            }
+            ctx.putImageData(idata, 0, 0);
+            if (document.getElementById('intro-terminal').style.opacity !== '0') {
+                requestAnimationFrame(generateNoise);
+            }
+        }
+        generateNoise();
+
+        // Lancer de journal d'époque & démarrage audio
+        function initiateSlam() {
+            const intro = document.getElementById('intro-terminal');
+            const viewport = document.getElementById('viewport');
+            const card = document.getElementById('birthdayCard');
+            const audio = document.getElementById('noir-theme');
+
+            // Lancer la lecture audio en premier
+            audio.play().catch(e => {
+                // Gestion de secours si l'appareil bloque l'audio
+            });
+
+            // Disparition en fondu de l'écran statique
+            intro.style.opacity = '0';
+            setTimeout(() => {
+                intro.style.display = 'none';
+            }, 800);
+
+            // Rendre le viewport actif
+            viewport.style.display = 'flex';
+
+            // Animation d'impact après une fraction de seconde
+            setTimeout(() => {
+                card.classList.add('slammed');
+                document.body.classList.add('screen-shake');
+                
+                // Retirer la classe de secousse à la fin de l'impact
+                setTimeout(() => {
+                    document.body.classList.remove('screen-shake');
+                }, 400);
+            }, 150);
+        }
+
+        // Bascule de la carte ouverte/fermée
         function toggleCard() {
             const card = document.getElementById('birthdayCard');
-            const hint = document.getElementById('hintText');
-            
             card.classList.toggle('open');
-            
-            if (card.classList.contains('open')) {
-                hint.style.opacity = '0';
-            } else {
-                hint.style.opacity = '1';
-            }
         }
     </script>
 </body>
