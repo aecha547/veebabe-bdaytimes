@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Birthday Times - Édition Spéciale</title>
+    <!-- Google Fonts pour l'authenticité de l'époque -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Special+Elite&family=La+Belle+Aurore&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --paper-color: #f4f0e6;
+            --paper-darker: #eadecc;
+            --ink-color: #1a1a1a;
+            --desk-bg: #0d0d0d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--desk-bg);
+            background-image: radial-gradient(circle at center, #1b1b1b 0%, #080808 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1800px;
+            overflow: hidden;
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Ombre et texture de fond du bureau */
+        .desk-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0) 60%, rgba(0,0,0,0.8) 100%);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Conteneur 3D de la carte */
+        .card-container {
+            width: 480px;
+            height: 650px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1.6s cubic-bezier(0.15, 0.85, 0.31, 1);
+            cursor: pointer;
+        }
+
+        .card-container.open {
+            transform: rotateY(0deg) translateX(120px);
+        }
+
+        /* Pages de la carte */
+        .page {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: var(--paper-color);
+            background-image: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(0,0,0,0.03) 100%);
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.06), 0 15px 35px rgba(0,0,0,0.5);
+            border-radius: 2px;
+        }
+
+        /* Couverture pliante (Front & Inside Left) */
+        .cover {
+            transform-origin: left center;
+            transform-style: preserve-3d;
+            transition: transform 1.4s cubic-bezier(0.15, 0.85, 0.31, 1);
+            z-index: 3;
+        }
+
+        .card-container.open .cover {
+            transform: rotateY(-180deg);
+        }
+
+        .cover-front {
+            backface-visibility: hidden;
+            z-index: 2;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .cover-back {
+            transform: rotateY(180deg);
+            backface-visibility: hidden;
+            z-index: 1;
+            box-shadow: inset -20px 0 30px rgba(0,0,0,0.08), 10px 15px 35px rgba(0,0,0,0.3);
+        }
+
+        /* Page de fond fixe (Inside Right) */
+        .base-page {
+            z-index: 1;
+            box-shadow: inset 20px 0 30px rgba(0,0,0,0.08), 0 15px 35px rgba(0,0,0,0.5);
+            padding: 50px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- Éléments Esthétiques Journal --- */
+        .newspaper-header {
+            text-align: center;
+            border-bottom: 3px double var(--ink-color);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+
+        .newspaper-title {
+            font-family: 'UnifrakturMaguntia', serif;
+            font-size: 3.5rem;
+            color: var(--ink-color);
+            line-height: 1;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+        }
+
+        .metadata-bar {
+            border-top: 1px solid var(--ink-color);
+            border-bottom: 1px solid var(--ink-color);
+            padding: 4px 0;
+            display: flex;
+            justify-content: space-between;
+            font-family: 'Special Elite', monospace;
+            font-size: 0.75rem;
+            color: var(--ink-color);
+            letter-spacing: 1px;
+        }
+
+        .headline-section {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .happy-birthday-sub {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 1.15rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--ink-color);
+            margin-bottom: 8px;
+        }
+
+        .main-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.6rem;
+            font-weight: 700;
+            letter-spacing: 12px;
+            text-transform: uppercase;
+            color: var(--ink-color);
+            margin-right: -12px; /* Compenser l'espacement de la dernière lettre */
+            line-height: 1.1;
+        }
+
+        /* Conteneur de l'image de presse */
+        .photo-frame {
+            position: relative;
+            width: 100%;
+            height: 380px;
+            border: 1px solid #c0bcae;
+            padding: 10px;
+            background-color: #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        /* Coins de fixation photo traditionnels */
+        .photo-frame::before, .photo-frame::after,
+        .photo-corner-bl, .photo-corner-br {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-color: var(--ink-color);
+            border-style: solid;
+            pointer-events: none;
+        }
+
+        .photo-frame::before { top: 6px; left: 6px; border-width: 1px 0 0 1px; }
+        .photo-frame::after { top: 6px; right: 6px; border-width: 1px 1px 0 0; }
+        .photo-corner-bl { bottom: 6px; left: 6px; border-width: 0 0 1px 1px; }
+        .photo-corner-br { bottom: 6px; right: 6px; border-width: 0 1px 1px 0; }
+
+        .photo-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(100%) contrast(1.1) sepia(5%);
+            border: 1px solid #dcd7ca;
+        }
+
+        /* --- Page Intérieure (Le Message Secret) --- */
+        .inner-message {
+            font-family: 'La Belle Aurore', cursive;
+            font-size: 1.95rem;
+            line-height: 1.45;
+            color: #1a1a1a;
+            text-align: center;
+            max-width: 320px;
+        }
+
+        /* Indication interactive discrète */
+        .interaction-hint {
+            position: absolute;
+            bottom: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Special Elite', monospace;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.4);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            pointer-events: none;
+            transition: opacity 0.5s;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .card-container.open + .interaction-hint {
+            opacity: 0;
+        }
+
+        /* Plis et ombres de papier vieilli réalistes */
+        .paper-crease {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0) 8%, rgba(255,255,255,0.08) 12%, rgba(0,0,0,0) 16%);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="desk-overlay"></div>
+
+    <!-- Conteneur Principal de la Carte -->
+    <div class="card-container" id="birthdayCard" onclick="toggleCard()">
+        
+        <!-- Page de Couverture Active -->
+        <div class="page cover">
+            <!-- Recto (Front du Journal) -->
+            <div class="page cover-front">
+                <div class="newspaper-header">
+                    <h1 class="newspaper-title">The birthday times</h1>
+                    <div class="metadata-bar">
+                        <span>BORN 12.06</span>
+                        <span>NUMBER:35</span>
+                    </div>
+                </div>
+                
+                <div class="headline-section">
+                    <h2 class="happy-birthday-sub">Happy Birthday</h2>
+                    <h1 class="main-name">V e e B a b e</h1>
+                </div>
+
+                <div class="photo-frame">
+                    <img src="BPaper.png" alt="VeeBabe Portrait">
+                    <div class="photo-corner-bl"></div>
+                    <div class="photo-corner-br"></div>
+                </div>
+                <div class="paper-crease"></div>
+            </div>
+
+            <!-- Verso (Page Intérieure Gauche - Vierge) -->
+            <div class="page cover-back">
+                <div class="paper-crease" style="transform: scaleX(-1);"></div>
+            </div>
+        </div>
+
+        <!-- Page Intérieure Droite (Message Fixe) -->
+        <div class="page base-page">
+            <div class="inner-message">
+                Breaking News.<br>
+                A beautiful French girl on the loose.<br>
+                If anyone finds her<br>
+                contact @Aecha ;)<br>
+                I love you.
+            </div>
+            <div class="paper-crease"></div>
+        </div>
+
+    </div>
+
+    <!-- Guidage Interactif -->
+    <div class="interaction-hint" id="hintText">Cliquer pour ouvrir</div>
+
+    <script>
+        function toggleCard() {
+            const card = document.getElementById('birthdayCard');
+            const hint = document.getElementById('hintText');
+            
+            card.classList.toggle('open');
+            
+            if (card.classList.contains('open')) {
+                hint.style.opacity = '0';
+            } else {
+                hint.style.opacity = '1';
+            }
+        }
+    </script>
+</body>
+</html>
