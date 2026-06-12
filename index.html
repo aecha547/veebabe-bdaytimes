@@ -1,546 +1,991 @@
-
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Birthday Times - Édition Spéciale</title>
-    <!-- Google Fonts pour l'authenticité de l'époque -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Special+Elite&family=La+Belle+Aurore&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            --paper-color: #f4f0e6;
-            --paper-darker: #eadecc;
-            --ink-color: #1a1a1a;
-            --desk-bg: #0d0d0d;
-            --glow-color: #ff3c00;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#050505" />
+  <title>The Birthday Times - Édition Spéciale</title>
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Special+Elite&family=La+Belle+Aurore&display=swap" rel="stylesheet" />
 
-        body {
-            background-color: var(--desk-bg);
-            background-image: radial-gradient(circle at center, #1b1b1b 0%, #080808 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            perspective: 1800px;
-            overflow: hidden;
-            font-family: 'Playfair Display', serif;
-        }
+  <style>
+    :root {
+      --paper-color: #f4f0e6;
+      --paper-darker: #eadecc;
+      --ink-color: #1a1a1a;
+      --desk-bg: #0d0d0d;
+      --glow-color: #ff3c00;
+      --beat: 0;
+      --card-width: min(480px, 88vw);
+      --shadow-heavy: 0 25px 70px rgba(0, 0, 0, 0.65);
+    }
 
-        /* --- ÉCRAN DE DÉMARRAGE CRT & STATIQUE --- */
-        #intro-terminal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: #050505;
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.8s ease, visibility 0.8s;
-        }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-        #static-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0.15;
-            pointer-events: none;
-            z-index: 1;
-        }
+    html,
+    body {
+      min-height: 100%;
+    }
 
-        .crt-scanlines {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            background-size: 100% 4px, 6px 100%;
-            pointer-events: none;
-            z-index: 2;
-        }
+    body {
+      background-color: var(--desk-bg);
+      background-image: radial-gradient(circle at center, #1b1b1b 0%, #080808 58%, #030303 100%);
+      min-height: 100vh;
+      min-height: 100svh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      perspective: 1800px;
+      overflow: hidden;
+      font-family: 'Playfair Display', serif;
+      color: #fff;
+    }
 
-        .breaking-box {
-            position: relative;
-            z-index: 3;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
+    button {
+      font: inherit;
+    }
 
-        .breaking-tag {
-            font-family: 'Special Elite', monospace;
-            background-color: var(--glow-color);
-            color: #000;
-            padding: 6px 16px;
-            font-size: 0.9rem;
-            font-weight: bold;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            box-shadow: 0 0 15px var(--glow-color);
-            animation: pulseGlow 1.5s infinite alternate;
-        }
+    /* ============================
+       NOIR BACKGROUND ANIMATION
+       Generic noir/comic inspiration, not a copied character or logo.
+       ============================ */
+    .noir-background {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% 42%, rgba(255, 255, 255, 0.07), transparent 22%),
+        radial-gradient(circle at 50% 60%, rgba(255, 60, 0, 0.07), transparent 34%),
+        linear-gradient(180deg, #111 0%, #050505 55%, #000 100%);
+      filter: contrast(calc(1.05 + (var(--beat) * 0.22))) brightness(calc(0.82 + (var(--beat) * 0.15)));
+    }
 
-        .terminal-headline {
-            font-family: 'Special Elite', monospace;
-            color: #fff;
-            font-size: 1.4rem;
-            letter-spacing: 2px;
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
-            margin-bottom: 20px;
-        }
+    .noir-svg {
+      position: absolute;
+      inset: -8% -8% -12% -8%;
+      width: 116%;
+      height: 120%;
+      opacity: calc(0.55 + (var(--beat) * 0.25));
+      transform: translate3d(0, 0, 0);
+    }
 
-        .tune-in-btn {
-            background: transparent;
-            border: 2px solid #fff;
-            color: #fff;
-            padding: 12px 28px;
-            font-family: 'Special Elite', monospace;
-            font-size: 1rem;
-            cursor: pointer;
-            letter-spacing: 2px;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 0 10px rgba(255,255,255,0.1);
-        }
+    .noir-panels rect,
+    .noir-panels path {
+      fill: rgba(0, 0, 0, 0.55);
+      stroke: rgba(255, 255, 255, 0.055);
+      stroke-width: 2;
+      animation: panelSweep 7.2s ease-in-out infinite;
+    }
 
-        .tune-in-btn:hover {
-            background-color: #fff;
-            color: #000;
-            box-shadow: 0 0 20px rgba(255,255,255,0.5);
-        }
+    .noir-panels rect:nth-child(2) { animation-delay: -1.5s; }
+    .noir-panels rect:nth-child(3) { animation-delay: -3s; }
+    .noir-panels path { animation-delay: -4.4s; }
 
-        @keyframes pulseGlow {
-            0% { transform: scale(1); opacity: 0.8; }
-            100% { transform: scale(1.05); opacity: 1; }
-        }
+    .city-layer {
+      fill: #020202;
+      stroke: rgba(255, 255, 255, 0.08);
+      stroke-width: 1.5;
+      transform-origin: center bottom;
+      animation: cityBreathe 4.6s ease-in-out infinite;
+    }
 
-        /* --- EFFET DE SECOUSSE DE L'ÉCRAN --- */
-        .screen-shake {
-            animation: screenImpact 0.4s ease-out forwards;
-        }
+    .city-window {
+      fill: rgba(255, 255, 255, 0.13);
+      animation: windowFlicker 3.7s steps(2, end) infinite;
+    }
 
-        @keyframes screenImpact {
-            0% { transform: translate(0, 0); }
-            15% { transform: translate(-15px, 12px) rotate(-1deg); }
-            30% { transform: translate(12px, -10px) rotate(1deg); }
-            45% { transform: translate(-8px, 6px); }
-            60% { transform: translate(5px, -4px); }
-            75% { transform: translate(-2px, 2px); }
-            100% { transform: translate(0, 0); }
-        }
+    .city-window:nth-child(odd) { animation-delay: -1.4s; }
+    .city-window:nth-child(3n) { animation-delay: -2.3s; }
 
-        /* --- BUREAU DE TRAVAIL & AMBIANCE --- */
-        .desk-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, rgba(0,0,0,0) 60%, rgba(0,0,0,0.8) 100%);
-            pointer-events: none;
-            z-index: 10;
-        }
+    .web-line,
+    .web-ring {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.13);
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      stroke-dasharray: 8 18;
+      filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.04));
+      animation: webTravel 5.8s linear infinite;
+    }
 
-        .blinds-shadow {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: repeating-linear-gradient(
-                to bottom,
-                rgba(0,0,0,0) 0%,
-                rgba(0,0,0,0) 40px,
-                rgba(0,0,0,0.65) 44px,
-                rgba(0,0,0,0.65) 80px
-            );
-            pointer-events: none;
-            opacity: 0.45;
-            z-index: 9;
-        }
+    .web-ring {
+      stroke-width: 1.2;
+      stroke-dasharray: 7 14;
+      animation-duration: 7.6s;
+      opacity: 0.8;
+    }
 
-        /* --- CONTENEUR DE LA CARTE --- */
-        .card-viewport {
-            display: none; /* Rendu visible après l'intro */
-            position: relative;
-            width: 100%;
-            height: 100vh;
-            justify-content: center;
-            align-items: center;
-            z-index: 5;
-        }
+    .web-line:nth-child(odd),
+    .web-ring:nth-child(odd) {
+      animation-direction: reverse;
+    }
 
-        .card-container {
-            width: 480px;
-            height: 650px;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0) rotate(-720deg);
-            transform-style: preserve-3d;
-            transition: transform 1.6s cubic-bezier(0.15, 0.85, 0.31, 1);
-            cursor: pointer;
-            opacity: 0;
-        }
+    .swing-thread {
+      stroke: rgba(255, 255, 255, 0.20);
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-dasharray: 4 10;
+      animation: threadPulse 2.2s ease-in-out infinite;
+    }
 
-        /* Classe déclenchée par l'impact du lancer */
-        .card-container.slammed {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1) rotate(0deg);
-        }
+    .noir-spider {
+      fill: #000;
+      stroke: rgba(255, 255, 255, 0.16);
+      stroke-width: 1.2;
+      transform-origin: 840px 210px;
+      animation: spiderSwing 5.2s ease-in-out infinite;
+      filter: drop-shadow(0 0 10px rgba(255, 60, 0, calc(0.08 + var(--beat) * 0.2)));
+    }
 
-        /* Ajustement de la translation pour maintenir le centrage visuel du dossier ouvert */
-        .card-container.slammed.open {
-            transform: translate(-25%, -50%) scale(1) rotateY(0deg);
-        }
+    .spider-eye {
+      fill: rgba(255, 60, 0, 0.82);
+      opacity: calc(0.4 + (var(--beat) * 0.6));
+    }
 
-        /* Pages de la carte */
-        .page {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-            background-color: var(--paper-color);
-            background-image: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(0,0,0,0.03) 100%);
-            box-shadow: inset 0 0 40px rgba(0,0,0,0.06), 0 15px 35px rgba(0,0,0,0.5);
-            border-radius: 2px;
-        }
+    .rain-layer,
+    .rain-layer::before,
+    .rain-layer::after {
+      position: absolute;
+      inset: -30% 0 0 0;
+      content: '';
+      background-image: repeating-linear-gradient(
+        105deg,
+        transparent 0 28px,
+        rgba(255, 255, 255, 0.075) 29px,
+        transparent 31px 66px
+      );
+      transform: translate3d(0, 0, 0) skewX(-12deg);
+      animation: noirRain 0.72s linear infinite;
+      opacity: 0.55;
+    }
 
-        /* Couverture pliante */
-        .cover {
-            transform-origin: left center;
-            transform-style: preserve-3d;
-            transition: transform 1.4s cubic-bezier(0.15, 0.85, 0.31, 1);
-            z-index: 3;
-        }
+    .rain-layer::before {
+      opacity: 0.38;
+      animation-duration: 1.05s;
+      transform: translate3d(20px, 0, 0) skewX(-12deg) scale(1.25);
+    }
 
-        .card-container.open .cover {
-            transform: rotateY(-180deg);
-        }
+    .rain-layer::after {
+      opacity: 0.24;
+      animation-duration: 1.45s;
+      transform: translate3d(-80px, 0, 0) skewX(-12deg) scale(1.6);
+    }
 
-        .cover-front {
-            backface-visibility: hidden;
-            z-index: 2;
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
+    .film-grain {
+      position: fixed;
+      inset: -50%;
+      pointer-events: none;
+      z-index: 3;
+      opacity: 0.11;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.7) 0 1px, transparent 1px),
+        radial-gradient(circle, rgba(0,0,0,0.9) 0 1px, transparent 1px);
+      background-size: 28px 28px, 19px 19px;
+      animation: grainMove 0.65s steps(5) infinite;
+      mix-blend-mode: overlay;
+    }
 
-        .cover-back {
-            transform: rotateY(180deg);
-            backface-visibility: hidden;
-            z-index: 1;
-            box-shadow: inset -20px 0 30px rgba(0,0,0,0.08), 10px 15px 35px rgba(0,0,0,0.3);
-        }
+    .beat-flash {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      background: radial-gradient(circle at 50% 45%, rgba(255, 60, 0, calc(0.02 + (var(--beat) * 0.13))), transparent 42%);
+      opacity: calc(0.25 + (var(--beat) * 0.45));
+    }
 
-        /* Page de fond fixe (Inside Right) */
-        .base-page {
-            z-index: 1;
-            box-shadow: inset 20px 0 30px rgba(0,0,0,0.08), 0 15px 35px rgba(0,0,0,0.5);
-            padding: 50px 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
+    .blinds-shadow {
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(0,0,0,0) 0,
+        rgba(0,0,0,0) 40px,
+        rgba(0,0,0,0.65) 44px,
+        rgba(0,0,0,0.65) 80px
+      );
+      pointer-events: none;
+      opacity: calc(0.45 + (var(--beat) * 0.18));
+      z-index: 9;
+      transform: translateZ(0);
+      animation: blindsDrift 6s ease-in-out infinite;
+    }
 
-        /* --- ÉLÉMENTS NEWSPAPER --- */
-        .newspaper-header {
-            text-align: center;
-            border-bottom: 3px double var(--ink-color);
-            padding-bottom: 5px;
-            margin-bottom: 15px;
-        }
+    .desk-overlay {
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(to bottom, rgba(0,0,0,0) 58%, rgba(0,0,0,0.82) 100%),
+        radial-gradient(circle at center, transparent 0 44%, rgba(0,0,0,0.55) 82%);
+      pointer-events: none;
+      z-index: 10;
+    }
 
-        .newspaper-title {
-            font-family: 'UnifrakturMaguntia', serif;
-            font-size: 3.5rem;
-            color: var(--ink-color);
-            line-height: 1;
-            letter-spacing: -1px;
-            margin-bottom: 12px;
-        }
+    @keyframes panelSweep {
+      0%, 100% { transform: translateX(-2%); opacity: 0.42; }
+      50% { transform: translateX(3%); opacity: 0.62; }
+    }
 
-        .metadata-bar {
-            border-top: 1px solid var(--ink-color);
-            border-bottom: 1px solid var(--ink-color);
-            padding: 4px 0;
-            display: flex;
-            justify-content: space-between;
-            font-family: 'Special Elite', monospace;
-            font-size: 0.75rem;
-            color: var(--ink-color);
-            letter-spacing: 1px;
-        }
+    @keyframes cityBreathe {
+      0%, 100% { transform: scaleY(1) translateY(0); }
+      50% { transform: scaleY(1.015) translateY(-2px); }
+    }
 
-        .headline-section {
-            text-align: center;
-            margin-bottom: 15px;
-        }
+    @keyframes windowFlicker {
+      0%, 82%, 100% { opacity: 0.28; }
+      84%, 88% { opacity: 0.08; }
+      90%, 96% { opacity: 0.38; }
+    }
 
-        .happy-birthday-sub {
-            font-family: 'Playfair Display', serif;
-            font-style: italic;
-            font-size: 1.15rem;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            color: var(--ink-color);
-            margin-bottom: 8px;
-        }
+    @keyframes webTravel {
+      to { stroke-dashoffset: -110; }
+    }
 
-        .main-name {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.6rem;
-            font-weight: 700;
-            letter-spacing: 12px;
-            text-transform: uppercase;
-            color: var(--ink-color);
-            margin-right: -12px;
-            line-height: 1.1;
-        }
+    @keyframes threadPulse {
+      0%, 100% { opacity: 0.18; stroke-dashoffset: 0; }
+      50% { opacity: 0.42; stroke-dashoffset: 22; }
+    }
 
-        .photo-frame {
-            position: relative;
-            width: 100%;
-            height: 380px;
-            border: 1px solid #c0bcae;
-            padding: 10px;
-            background-color: #fff;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
+    @keyframes spiderSwing {
+      0%, 100% { transform: rotate(-8deg) translateY(0); }
+      50% { transform: rotate(9deg) translateY(10px); }
+    }
 
-        .photo-frame::before, .photo-frame::after,
-        .photo-corner-bl, .photo-corner-br {
-            content: '';
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            border-color: var(--ink-color);
-            border-style: solid;
-            pointer-events: none;
-        }
+    @keyframes noirRain {
+      to { background-position: 0 140px; }
+    }
 
-        .photo-frame::before { top: 6px; left: 6px; border-width: 1px 0 0 1px; }
-        .photo-frame::after { top: 6px; right: 6px; border-width: 1px 1px 0 0; }
-        .photo-corner-bl { bottom: 6px; left: 6px; border-width: 0 0 1px 1px; }
-        .photo-corner-br { bottom: 6px; right: 6px; border-width: 0 1px 1px 0; }
+    @keyframes grainMove {
+      0% { transform: translate(0, 0); }
+      20% { transform: translate(-4%, 3%); }
+      40% { transform: translate(3%, -2%); }
+      60% { transform: translate(-2%, -4%); }
+      80% { transform: translate(4%, 2%); }
+      100% { transform: translate(0, 0); }
+    }
 
-        .photo-frame img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            filter: grayscale(100%) contrast(1.1) sepia(5%);
-            border: 1px solid #dcd7ca;
-        }
+    @keyframes blindsDrift {
+      0%, 100% { transform: translateY(-6px); }
+      50% { transform: translateY(8px); }
+    }
 
-        /* --- PAGE INTÉRIEURE (MESSAGE) --- */
-        .inner-message {
-            font-family: 'La Belle Aurore', cursive;
-            font-size: 1.95rem;
-            line-height: 1.45;
-            color: #1a1a1a;
-            text-align: center;
-            max-width: 320px;
-        }
+    /* ============================
+       INTRO CRT SCREEN
+       ============================ */
+    #intro-terminal {
+      position: fixed;
+      inset: 0;
+      background-color: #050505;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: opacity 0.8s ease, visibility 0.8s ease;
+    }
 
-        /* --- INVITATION À L'INTERACTION (LANGUETTE DOSSIER) --- */
-        .file-tab-prompt {
-            position: absolute;
-            top: 240px;
-            right: -32px;
-            background-color: #c4331a;
-            color: #fff;
-            font-family: 'Special Elite', monospace;
-            font-size: 0.72rem;
-            padding: 12px 6px;
-            text-transform: uppercase;
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
-            letter-spacing: 2px;
-            border-radius: 0 4px 4px 0;
-            box-shadow: 3px 2px 8px rgba(0,0,0,0.4);
-            transition: opacity 0.5s, transform 0.5s;
-            z-index: 10;
-            animation: subtleSlide 1.5s infinite alternate;
-        }
+    #intro-terminal.is-hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
 
-        .card-container.open .file-tab-prompt {
-            opacity: 0;
-            transform: translateX(-10px);
-            pointer-events: none;
-        }
+    #static-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: 1;
+      image-rendering: pixelated;
+    }
 
-        @keyframes subtleSlide {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(4px); }
-        }
+    .crt-scanlines {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+      background-size: 100% 4px, 6px 100%;
+      pointer-events: none;
+      z-index: 2;
+    }
 
-        .paper-crease {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to right, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0) 8%, rgba(255,255,255,0.08) 12%, rgba(0,0,0,0) 16%);
-            pointer-events: none;
-        }
-    </style>
+    .breaking-box {
+      position: relative;
+      z-index: 3;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding: 24px;
+    }
+
+    .breaking-tag {
+      font-family: 'Special Elite', monospace;
+      background-color: var(--glow-color);
+      color: #000;
+      padding: 6px 16px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      box-shadow: 0 0 15px var(--glow-color);
+      animation: pulseGlow 1.5s infinite alternate;
+    }
+
+    .terminal-headline {
+      font-family: 'Special Elite', monospace;
+      color: #fff;
+      font-size: clamp(1rem, 3vw, 1.4rem);
+      letter-spacing: 2px;
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+      margin-bottom: 20px;
+    }
+
+    .tune-in-btn {
+      background: transparent;
+      border: 2px solid #fff;
+      color: #fff;
+      padding: 12px 28px;
+      font-family: 'Special Elite', monospace;
+      font-size: 1rem;
+      cursor: pointer;
+      letter-spacing: 2px;
+      transition: background-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(255,255,255,0.1);
+    }
+
+    .tune-in-btn:hover,
+    .tune-in-btn:focus-visible {
+      background-color: #fff;
+      color: #000;
+      box-shadow: 0 0 20px rgba(255,255,255,0.5);
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    @keyframes pulseGlow {
+      0% { transform: scale(1); opacity: 0.82; }
+      100% { transform: scale(1.05); opacity: 1; }
+    }
+
+    .screen-shake {
+      animation: screenImpact 0.4s ease-out forwards;
+    }
+
+    @keyframes screenImpact {
+      0% { transform: translate(0, 0); }
+      15% { transform: translate(-15px, 12px) rotate(-1deg); }
+      30% { transform: translate(12px, -10px) rotate(1deg); }
+      45% { transform: translate(-8px, 6px); }
+      60% { transform: translate(5px, -4px); }
+      75% { transform: translate(-2px, 2px); }
+      100% { transform: translate(0, 0); }
+    }
+
+    /* ============================
+       CARD
+       ============================ */
+    .card-viewport {
+      display: none;
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      height: 100svh;
+      justify-content: center;
+      align-items: center;
+      z-index: 5;
+      transform: translateZ(0);
+    }
+
+    .card-viewport.is-visible {
+      display: flex;
+    }
+
+    .card-container {
+      width: var(--card-width);
+      aspect-ratio: 480 / 650;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0) rotate(-720deg);
+      transform-style: preserve-3d;
+      transition: transform 1.6s cubic-bezier(0.15, 0.85, 0.31, 1), opacity 0.5s ease;
+      cursor: pointer;
+      opacity: 0;
+      outline: none;
+      filter: drop-shadow(0 15px 35px rgba(0,0,0,0.7));
+    }
+
+    .card-container:focus-visible {
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.9), 0 0 0 7px rgba(255,60,0,0.65);
+    }
+
+    .card-container.slammed {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    }
+
+    .card-container.slammed.open {
+      transform: translate(-25%, -50%) scale(1) rotateY(0deg);
+    }
+
+    .page {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      inset: 0;
+      background-color: var(--paper-color);
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(0,0,0,0.03) 100%),
+        linear-gradient(90deg, rgba(0,0,0,0.035), transparent 9%, transparent 91%, rgba(0,0,0,0.035));
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.06), var(--shadow-heavy);
+      border-radius: 2px;
+      color: var(--ink-color);
+      overflow: hidden;
+    }
+
+    .cover {
+      transform-origin: left center;
+      transform-style: preserve-3d;
+      transition: transform 1.4s cubic-bezier(0.15, 0.85, 0.31, 1);
+      z-index: 3;
+    }
+
+    .card-container.open .cover {
+      transform: rotateY(-180deg);
+    }
+
+    .cover-front {
+      backface-visibility: hidden;
+      z-index: 2;
+      padding: clamp(18px, 5vw, 30px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .cover-back {
+      transform: rotateY(180deg);
+      backface-visibility: hidden;
+      z-index: 1;
+      box-shadow: inset -20px 0 30px rgba(0,0,0,0.08), 10px 15px 35px rgba(0,0,0,0.3);
+    }
+
+    .base-page {
+      z-index: 1;
+      box-shadow: inset 20px 0 30px rgba(0,0,0,0.08), var(--shadow-heavy);
+      padding: clamp(30px, 7vw, 50px) clamp(24px, 6vw, 40px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .newspaper-header {
+      text-align: center;
+      border-bottom: 3px double var(--ink-color);
+      padding-bottom: 5px;
+      margin-bottom: clamp(10px, 2vw, 15px);
+      flex: 0 0 auto;
+    }
+
+    .newspaper-title {
+      font-family: 'UnifrakturMaguntia', serif;
+      font-size: clamp(2.45rem, 8vw, 3.5rem);
+      color: var(--ink-color);
+      line-height: 1;
+      letter-spacing: -1px;
+      margin-bottom: 12px;
+      white-space: nowrap;
+    }
+
+    .metadata-bar {
+      border-top: 1px solid var(--ink-color);
+      border-bottom: 1px solid var(--ink-color);
+      padding: 4px 0;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      font-family: 'Special Elite', monospace;
+      font-size: clamp(0.62rem, 2vw, 0.75rem);
+      color: var(--ink-color);
+      letter-spacing: 1px;
+    }
+
+    .headline-section {
+      text-align: center;
+      margin-bottom: clamp(10px, 2vw, 15px);
+      flex: 0 0 auto;
+    }
+
+    .happy-birthday-sub {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: clamp(0.9rem, 3vw, 1.15rem);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--ink-color);
+      margin-bottom: 8px;
+    }
+
+    .main-name {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.9rem, 7vw, 2.6rem);
+      font-weight: 700;
+      letter-spacing: clamp(6px, 2.5vw, 12px);
+      text-transform: uppercase;
+      color: var(--ink-color);
+      margin-right: -12px;
+      line-height: 1.1;
+      white-space: nowrap;
+    }
+
+    .photo-frame {
+      position: relative;
+      width: 100%;
+      flex: 1 1 auto;
+      min-height: 260px;
+      border: 1px solid #c0bcae;
+      padding: 10px;
+      background-color: #fff;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+
+    .photo-frame::before,
+    .photo-frame::after,
+    .photo-corner-bl,
+    .photo-corner-br {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-color: var(--ink-color);
+      border-style: solid;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .photo-frame::before { top: 6px; left: 6px; border-width: 1px 0 0 1px; }
+    .photo-frame::after { top: 6px; right: 6px; border-width: 1px 1px 0 0; }
+    .photo-corner-bl { bottom: 6px; left: 6px; border-width: 0 0 1px 1px; }
+    .photo-corner-br { bottom: 6px; right: 6px; border-width: 0 1px 1px 0; }
+
+    .photo-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(100%) contrast(1.1) sepia(5%);
+      border: 1px solid #dcd7ca;
+      display: block;
+      background: #ddd;
+    }
+
+    .inner-message {
+      font-family: 'La Belle Aurore', cursive;
+      font-size: clamp(1.45rem, 5vw, 1.95rem);
+      line-height: 1.45;
+      color: #1a1a1a;
+      text-align: center;
+      max-width: 320px;
+    }
+
+    .file-tab-prompt {
+      position: absolute;
+      top: 37%;
+      right: -32px;
+      background-color: #c4331a;
+      color: #fff;
+      font-family: 'Special Elite', monospace;
+      font-size: 0.72rem;
+      padding: 12px 6px;
+      text-transform: uppercase;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      letter-spacing: 2px;
+      border-radius: 0 4px 4px 0;
+      box-shadow: 3px 2px 8px rgba(0,0,0,0.4);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      z-index: 10;
+      animation: subtleSlide 1.5s infinite alternate;
+    }
+
+    .card-container.open .file-tab-prompt {
+      opacity: 0;
+      transform: translateX(-10px);
+      pointer-events: none;
+    }
+
+    @keyframes subtleSlide {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(4px); }
+    }
+
+    .paper-crease {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0) 8%, rgba(255,255,255,0.08) 12%, rgba(0,0,0,0) 16%);
+      pointer-events: none;
+    }
+
+    .paper-noise {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.18;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(0,0,0,0.03) 0 1px, transparent 1px 3px),
+        radial-gradient(circle at 20% 20%, rgba(0,0,0,0.03), transparent 20%),
+        radial-gradient(circle at 80% 75%, rgba(0,0,0,0.045), transparent 22%);
+      mix-blend-mode: multiply;
+    }
+
+    @media (max-width: 680px) {
+      :root { --card-width: min(430px, 84vw); }
+
+      .card-container.slammed.open {
+        transform: translate(-18%, -50%) scale(0.9) rotateY(0deg);
+      }
+
+      .file-tab-prompt {
+        right: -29px;
+        font-size: 0.65rem;
+      }
+    }
+
+    @media (max-width: 420px) {
+      :root { --card-width: 82vw; }
+      .card-container.slammed.open {
+        transform: translate(-20%, -50%) scale(0.82) rotateY(0deg);
+      }
+      .photo-frame { min-height: 210px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.001ms !important;
+      }
+
+      .rain-layer,
+      .film-grain {
+        display: none;
+      }
+    }
+  </style>
 </head>
 <body>
+  <div class="noir-background" aria-hidden="true">
+    <svg class="noir-svg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="fogFade" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="rgba(255,255,255,0.10)" />
+          <stop offset="100%" stop-color="rgba(255,255,255,0)" />
+        </linearGradient>
+      </defs>
 
-    <!-- Système de rendu de friture d'antenne analogique -->
-    <div id="intro-terminal">
-        <canvas id="static-canvas"></canvas>
-        <div class="crt-scanlines"></div>
-        <div class="breaking-box">
-            <div class="breaking-tag">Breaking News</div>
-            <div class="terminal-headline">Dr. Mind INVESTIGATIONS </div>
-            <button class="tune-in-btn" onclick="initiateSlam()">Intercepter le Signal</button>
-        </div>
+      <g class="noir-panels">
+        <rect x="-80" y="70" width="1360" height="72" />
+        <rect x="-60" y="230" width="1320" height="96" />
+        <rect x="-80" y="435" width="1360" height="86" />
+        <path d="M-40 640 L1240 565 L1240 710 L-40 760 Z" />
+      </g>
+
+      <g class="webs" opacity="0.85">
+        <path class="web-line" d="M-40 45 C180 80 260 190 405 360 S690 650 1245 540" />
+        <path class="web-line" d="M1230 20 C920 80 805 190 735 360 S520 590 -90 610" />
+        <path class="web-line" d="M100 760 C260 520 400 390 590 302 S930 170 1160 42" />
+        <path class="web-ring" d="M-10 130 C190 160 320 245 430 370 C540 495 650 615 970 650" />
+        <path class="web-ring" d="M1180 150 C980 180 820 270 710 390 C600 510 420 610 80 650" />
+      </g>
+
+      <g class="swinger">
+        <line class="swing-thread" x1="836" y1="-20" x2="836" y2="188" />
+        <g class="noir-spider">
+          <ellipse cx="836" cy="205" rx="15" ry="20" />
+          <circle cx="836" cy="181" r="12" />
+          <path d="M824 202 C790 196 775 184 758 164" />
+          <path d="M824 211 C789 218 770 236 748 260" />
+          <path d="M848 202 C882 196 897 184 914 164" />
+          <path d="M848 211 C883 218 902 236 924 260" />
+          <path d="M827 220 C800 238 788 260 775 292" />
+          <path d="M845 220 C872 238 884 260 897 292" />
+          <ellipse class="spider-eye" cx="831" cy="179" rx="2.5" ry="3" />
+          <ellipse class="spider-eye" cx="841" cy="179" rx="2.5" ry="3" />
+        </g>
+      </g>
+
+      <g class="city-layer">
+        <path d="M-50 800 L-50 590 L20 590 L20 520 L95 520 L95 640 L155 640 L155 470 L230 470 L230 620 L300 620 L300 540 L360 540 L360 655 L430 655 L430 430 L525 430 L525 615 L585 615 L585 505 L650 505 L650 645 L710 645 L710 455 L785 455 L785 600 L850 600 L850 520 L915 520 L915 660 L990 660 L990 445 L1080 445 L1080 610 L1150 610 L1150 530 L1240 530 L1240 800 Z" />
+        <rect class="city-window" x="176" y="500" width="10" height="26" />
+        <rect class="city-window" x="204" y="535" width="10" height="26" />
+        <rect class="city-window" x="456" y="465" width="12" height="28" />
+        <rect class="city-window" x="492" y="515" width="12" height="28" />
+        <rect class="city-window" x="734" y="486" width="10" height="24" />
+        <rect class="city-window" x="760" y="535" width="10" height="24" />
+        <rect class="city-window" x="1017" y="480" width="12" height="28" />
+        <rect class="city-window" x="1048" y="540" width="12" height="28" />
+      </g>
+
+      <rect x="0" y="0" width="1200" height="800" fill="url(#fogFade)" opacity="0.4" />
+    </svg>
+    <div class="rain-layer"></div>
+    <div class="beat-flash"></div>
+  </div>
+
+  <div class="film-grain" aria-hidden="true"></div>
+  <div class="blinds-shadow" aria-hidden="true"></div>
+  <div class="desk-overlay" aria-hidden="true"></div>
+
+  <section id="intro-terminal" aria-label="Écran de démarrage">
+    <canvas id="static-canvas"></canvas>
+    <div class="crt-scanlines"></div>
+    <div class="breaking-box">
+      <div class="breaking-tag">Breaking News</div>
+      <div class="terminal-headline">Dr. Mind INVESTIGATIONS</div>
+      <button class="tune-in-btn" id="startBtn" type="button">Intercepter le Signal</button>
     </div>
+  </section>
 
-    <div class="blinds-shadow"></div>
-    <div class="desk-overlay"></div>
+  <main class="card-viewport" id="viewport" aria-live="polite">
+    <article
+      class="card-container"
+      id="birthdayCard"
+      role="button"
+      tabindex="0"
+      aria-label="Ouvrir ou fermer la carte d'anniversaire"
+      aria-expanded="false"
+    >
+      <div class="file-tab-prompt">Ouvrir le dossier</div>
 
-    <!-- Conteneur global de rendu après lancement -->
-    <div class="card-viewport" id="viewport">
-        <div class="card-container" id="birthdayCard" onclick="toggleCard()">
-            
-            <!-- Ruban dossier invitant à ouvrir -->
-            <div class="file-tab-prompt">Ouvrir le dossier</div>
-
-            <!-- Page de Couverture Active -->
-            <div class="page cover">
-                <!-- Recto -->
-                <div class="page cover-front">
-                    <div class="newspaper-header">
-                        <h1 class="newspaper-title">The birthday times</h1>
-                        <div class="metadata-bar">
-                            <span>BORN 12.06</span>
-                            <span>NUMBER:35</span>
-                        </div>
-                    </div>
-                    
-                    <div class="headline-section">
-                        <h2 class="happy-birthday-sub">Happy Birthday</h2>
-                        <h1 class="main-name">V e e B a b e</h1>
-                    </div>
-
-                    <div class="photo-frame">
-                        <img src="BPaper.png" alt="VeeBabe Portrait">
-                        <div class="photo-corner-bl"></div>
-                        <div class="photo-corner-br"></div>
-                    </div>
-                    <div class="paper-crease"></div>
-                </div>
-
-                <!-- Verso -->
-                <div class="page cover-back">
-                    <div class="paper-crease" style="transform: scaleX(-1);"></div>
-                </div>
+      <div class="page cover">
+        <section class="page cover-front">
+          <div class="newspaper-header">
+            <h1 class="newspaper-title">The birthday times</h1>
+            <div class="metadata-bar">
+              <span>BORN 12.06</span>
+              <span>NUMBER:35</span>
             </div>
+          </div>
 
-            <!-- Page de Fond (Intérieur) -->
-            <div class="page base-page">
-                <div class="inner-message">
-                    Breaking News.<br>
-                    A beautiful French girl on the loose.<br>
-                    If anyone finds her<br>
-                    contact @Aecha ;)<br>
-                    I love you.
-                </div>
-                <div class="paper-crease"></div>
-            </div>
+          <div class="headline-section">
+            <h2 class="happy-birthday-sub">Happy Birthday</h2>
+            <h1 class="main-name">V e e B a b e</h1>
+          </div>
 
+          <div class="photo-frame">
+            <img src="BPaper.png" alt="VeeBabe Portrait" loading="eager" />
+            <div class="photo-corner-bl"></div>
+            <div class="photo-corner-br"></div>
+          </div>
+
+          <div class="paper-crease"></div>
+          <div class="paper-noise"></div>
+        </section>
+
+        <section class="page cover-back" aria-hidden="true">
+          <div class="paper-crease" style="transform: scaleX(-1);"></div>
+          <div class="paper-noise"></div>
+        </section>
+      </div>
+
+      <section class="page base-page">
+        <div class="inner-message">
+          Breaking News.<br />
+          A beautiful French girl on the loose.<br />
+          If anyone finds her<br />
+          contact @Aecha ;)<br />
+          I love you.
         </div>
-    </div>
+        <div class="paper-crease"></div>
+        <div class="paper-noise"></div>
+      </section>
+    </article>
+  </main>
 
-    <!-- Lecteur Audio d'ambiance -->
-    <audio id="noir-theme" src="KIRBY - Saving Grace (Official Music Video) from Spider-Noir (The Prime Original Series).mp3" loop></audio>
+  <audio
+    id="noir-theme"
+    src="KIRBY - Saving Grace (Official Music Video) from Spider-Noir (The Prime Original Series).mp3"
+    preload="auto"
+    loop
+  ></audio>
 
-    <script>
-        // Rendu dynamique du grain statique CRT
-        const canvas = document.getElementById('static-canvas');
-        const ctx = canvas.getContext('2d');
+  <script>
+    (() => {
+      'use strict';
 
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+      const intro = document.getElementById('intro-terminal');
+      const viewport = document.getElementById('viewport');
+      const card = document.getElementById('birthdayCard');
+      const startBtn = document.getElementById('startBtn');
+      const audio = document.getElementById('noir-theme');
+      const canvas = document.getElementById('static-canvas');
+      const ctx = canvas.getContext('2d', { alpha: false });
 
-        function generateNoise() {
-            const idata = ctx.createImageData(canvas.width, canvas.height);
-            const buffer = new Uint32Array(idata.data.buffer);
-            const len = buffer.length;
-            
-            for (let i = 0; i < len; i++) {
-                if (Math.random() < 0.5) {
-                    buffer[i] = 0xff101010; // Pixel sombre
-                } else {
-                    buffer[i] = 0xff505050; // Pixel gris
-                }
-            }
-            ctx.putImageData(idata, 0, 0);
-            if (document.getElementById('intro-terminal').style.opacity !== '0') {
-                requestAnimationFrame(generateNoise);
-            }
-        }
-        generateNoise();
+      let introActive = true;
+      let started = false;
+      let noiseFrame = 0;
+      let audioContext;
+      let analyser;
+      let frequencyData;
+      let sourceNode;
+      let beatFrame = 0;
 
-        // Lancer de journal d'époque & démarrage audio
-        function initiateSlam() {
-            const intro = document.getElementById('intro-terminal');
-            const viewport = document.getElementById('viewport');
-            const card = document.getElementById('birthdayCard');
-            const audio = document.getElementById('noir-theme');
+      function resizeCanvas() {
+        const scale = window.devicePixelRatio > 1 ? 0.38 : 0.55;
+        const width = Math.max(180, Math.floor(window.innerWidth * scale));
+        const height = Math.max(120, Math.floor(window.innerHeight * scale));
 
-            // Lancer la lecture audio en premier
-            audio.play().catch(e => {
-                // Gestion de secours si l'appareil bloque l'audio
-            });
+        canvas.width = width;
+        canvas.height = height;
+      }
 
-            // Disparition en fondu de l'écran statique
-            intro.style.opacity = '0';
-            setTimeout(() => {
-                intro.style.display = 'none';
-            }, 800);
+      function generateNoise() {
+        if (!introActive) return;
 
-            // Rendre le viewport actif
-            viewport.style.display = 'flex';
+        const imageData = ctx.createImageData(canvas.width, canvas.height);
+        const buffer = new Uint32Array(imageData.data.buffer);
 
-            // Animation d'impact après une fraction de seconde
-            setTimeout(() => {
-                card.classList.add('slammed');
-                document.body.classList.add('screen-shake');
-                
-                // Retirer la classe de secousse à la fin de l'impact
-                setTimeout(() => {
-                    document.body.classList.remove('screen-shake');
-                }, 400);
-            }, 150);
+        for (let i = 0; i < buffer.length; i += 1) {
+          const shade = Math.random() > 0.52 ? 0x4f : 0x10;
+          buffer[i] = (255 << 24) | (shade << 16) | (shade << 8) | shade;
         }
 
-        // Bascule de la carte ouverte/fermée
-        function toggleCard() {
-            const card = document.getElementById('birthdayCard');
-            card.classList.toggle('open');
+        ctx.putImageData(imageData, 0, 0);
+        noiseFrame = window.requestAnimationFrame(generateNoise);
+      }
+
+      function setupAudioReactiveBackground() {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        if (!window.AudioContext && !window.webkitAudioContext) return;
+
+        try {
+          audioContext = audioContext || new (window.AudioContext || window.webkitAudioContext)();
+
+          if (!sourceNode) {
+            sourceNode = audioContext.createMediaElementSource(audio);
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 128;
+            analyser.smoothingTimeConstant = 0.82;
+
+            sourceNode.connect(analyser);
+            analyser.connect(audioContext.destination);
+            frequencyData = new Uint8Array(analyser.frequencyBinCount);
+          }
+
+          if (audioContext.state === 'suspended') {
+            audioContext.resume();
+          }
+
+          startBeatLoop();
+        } catch (error) {
+          document.documentElement.style.setProperty('--beat', '0.18');
         }
-    </script>
+      }
+
+      function startBeatLoop() {
+        if (!analyser || !frequencyData) return;
+        cancelAnimationFrame(beatFrame);
+
+        const tick = () => {
+          analyser.getByteFrequencyData(frequencyData);
+
+          const bassBins = Math.min(10, frequencyData.length);
+          let bassTotal = 0;
+          for (let i = 0; i < bassBins; i += 1) {
+            bassTotal += frequencyData[i];
+          }
+
+          const beat = Math.min(1, bassTotal / (bassBins * 255));
+          const shapedBeat = Math.max(0.08, Math.pow(beat, 1.35));
+          document.documentElement.style.setProperty('--beat', shapedBeat.toFixed(3));
+
+          beatFrame = requestAnimationFrame(tick);
+        };
+
+        tick();
+      }
+
+      function initiateSlam() {
+        if (started) return;
+        started = true;
+
+        audio.play()
+          .then(setupAudioReactiveBackground)
+          .catch(() => {
+            document.documentElement.style.setProperty('--beat', '0.16');
+          });
+
+        intro.classList.add('is-hidden');
+        viewport.classList.add('is-visible');
+
+        setTimeout(() => {
+          introActive = false;
+          cancelAnimationFrame(noiseFrame);
+          intro.style.display = 'none';
+        }, 820);
+
+        setTimeout(() => {
+          card.classList.add('slammed');
+          viewport.classList.add('screen-shake');
+
+          setTimeout(() => {
+            viewport.classList.remove('screen-shake');
+          }, 430);
+        }, 150);
+      }
+
+      function toggleCard() {
+        if (!card.classList.contains('slammed')) return;
+        card.classList.toggle('open');
+        card.setAttribute('aria-expanded', String(card.classList.contains('open')));
+      }
+
+      function handleCardKeydown(event) {
+        const isActivationKey = event.key === 'Enter' || event.key === ' ';
+        if (!isActivationKey) return;
+        event.preventDefault();
+        toggleCard();
+      }
+
+      function handleVisibilityChange() {
+        if (document.hidden) {
+          cancelAnimationFrame(beatFrame);
+          return;
+        }
+
+        if (started && analyser && frequencyData) {
+          startBeatLoop();
+        }
+      }
+
+      window.addEventListener('resize', resizeCanvas, { passive: true });
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      startBtn.addEventListener('click', initiateSlam);
+      card.addEventListener('click', toggleCard);
+      card.addEventListener('keydown', handleCardKeydown);
+
+      resizeCanvas();
+      generateNoise();
+    })();
+  </script>
 </body>
 </html>
